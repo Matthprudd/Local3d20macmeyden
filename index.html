@@ -1,0 +1,2893 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MEYDEN Dremel 3D20</title>
+
+<style>
+*{
+    box-sizing:border-box;
+}
+
+:root{
+    --bg:#090b0e;
+    --panel:#11151a;
+    --panel2:#171c22;
+    --line:#2b343d;
+    --text:#f4f7fa;
+    --muted:#8f9ba7;
+    --orange:#ff7a00;
+    --green:#31d17c;
+    --red:#ff4d4d;
+    --blue:#3b9eff;
+}
+
+html,body{
+    margin:0;
+    width:100%;
+    min-height:100%;
+    background:var(--bg);
+    color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
+
+body{
+    padding:18px;
+}
+
+.app{
+    max-width:1450px;
+    margin:auto;
+}
+
+.header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:20px;
+    padding:20px 24px;
+    background:linear-gradient(135deg,#151a20,#090b0e);
+    border:1px solid var(--line);
+    border-radius:18px;
+    margin-bottom:16px;
+}
+
+.brand h1{
+    margin:0;
+    font-size:25px;
+    letter-spacing:.5px;
+}
+
+.brand small{
+    display:block;
+    color:var(--orange);
+    margin-top:5px;
+    font-weight:700;
+}
+
+.status{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    background:#090c0f;
+    border:1px solid var(--line);
+    padding:10px 15px;
+    border-radius:100px;
+    font-size:13px;
+    font-weight:700;
+}
+
+.status-dot{
+    width:11px;
+    height:11px;
+    border-radius:50%;
+    background:var(--red);
+    box-shadow:0 0 12px rgba(255,77,77,.8);
+}
+
+.status.connected .status-dot{
+    background:var(--green);
+    box-shadow:0 0 12px rgba(49,209,124,.8);
+}
+
+.grid{
+    display:grid;
+    grid-template-columns:330px 1fr 330px;
+    gap:16px;
+}
+
+.panel{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:18px;
+    overflow:hidden;
+}
+
+.panel-title{
+    padding:16px 18px;
+    border-bottom:1px solid var(--line);
+    font-size:13px;
+    font-weight:800;
+    letter-spacing:1px;
+    text-transform:uppercase;
+    color:#cfd6dc;
+}
+
+.panel-content{
+    padding:18px;
+}
+
+.drop{
+    min-height:160px;
+    border:2px dashed #39434d;
+    border-radius:14px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    text-align:center;
+    padding:20px;
+    cursor:pointer;
+    transition:.2s;
+}
+
+.drop:hover,
+.drop.drag{
+    border-color:var(--orange);
+    background:rgba(255,122,0,.05);
+}
+
+.drop-icon{
+    font-size:38px;
+    margin-bottom:10px;
+}
+
+.drop strong{
+    font-size:15px;
+}
+
+.drop span{
+    margin-top:6px;
+    color:var(--muted);
+    font-size:12px;
+}
+
+.file-info{
+    margin-top:15px;
+    background:#0b0e12;
+    padding:12px;
+    border-radius:12px;
+    font-size:12px;
+    line-height:1.7;
+    color:var(--muted);
+}
+
+.file-info b{
+    color:white;
+}
+
+input[type=file]{
+    display:none;
+}
+
+label{
+    display:block;
+    color:#aab4bd;
+    font-size:12px;
+    margin-bottom:7px;
+    font-weight:700;
+}
+
+.field{
+    margin-bottom:15px;
+}
+
+select,
+input[type=number]{
+    width:100%;
+    background:#0a0d10;
+    border:1px solid var(--line);
+    color:white;
+    padding:11px;
+    border-radius:10px;
+    outline:none;
+}
+
+select:focus,
+input:focus{
+    border-color:var(--orange);
+}
+
+.switch-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin:12px 0;
+    color:#cbd3d9;
+    font-size:13px;
+}
+
+.switch{
+    width:46px;
+    height:25px;
+    position:relative;
+}
+
+.switch input{
+    display:none;
+}
+
+.slider{
+    position:absolute;
+    inset:0;
+    background:#333c45;
+    border-radius:100px;
+    cursor:pointer;
+}
+
+.slider:before{
+    content:"";
+    position:absolute;
+    width:19px;
+    height:19px;
+    left:3px;
+    top:3px;
+    background:white;
+    border-radius:50%;
+    transition:.2s;
+}
+
+.switch input:checked + .slider{
+    background:var(--orange);
+}
+
+.switch input:checked + .slider:before{
+    transform:translateX(21px);
+}
+
+.viewer{
+    min-height:580px;
+    position:relative;
+    background:
+        radial-gradient(circle at center,#182028 0,#0a0d10 65%);
+}
+
+#canvas{
+    width:100%;
+    height:580px;
+    display:block;
+    cursor:grab;
+}
+
+#canvas:active{
+    cursor:grabbing;
+}
+
+.viewer-overlay{
+    position:absolute;
+    top:15px;
+    left:15px;
+    display:flex;
+    gap:8px;
+    pointer-events:none;
+}
+
+.badge{
+    padding:7px 10px;
+    border-radius:8px;
+    background:rgba(0,0,0,.65);
+    border:1px solid #303943;
+    font-size:11px;
+    color:#bdc7d0;
+}
+
+.build-volume{
+    position:absolute;
+    right:15px;
+    bottom:15px;
+    background:rgba(0,0,0,.72);
+    padding:9px 12px;
+    font-size:11px;
+    color:#9aa6b1;
+    border-radius:9px;
+    border:1px solid #303943;
+}
+
+.btn{
+    width:100%;
+    border:0;
+    border-radius:11px;
+    padding:12px 14px;
+    cursor:pointer;
+    color:white;
+    background:#252d35;
+    font-weight:800;
+    font-size:12px;
+    margin-top:9px;
+    transition:.15s;
+}
+
+.btn:hover{
+    transform:translateY(-1px);
+    filter:brightness(1.15);
+}
+
+.btn.orange{
+    background:var(--orange);
+    color:#111;
+}
+
+.btn.green{
+    background:var(--green);
+    color:#06150d;
+}
+
+.btn.blue{
+    background:var(--blue);
+}
+
+.btn.red{
+    background:#8e2929;
+}
+
+.btn:disabled{
+    opacity:.35;
+    cursor:not-allowed;
+    transform:none;
+}
+
+.usb-box{
+    padding:12px;
+    background:#090c0f;
+    border:1px solid var(--line);
+    border-radius:12px;
+    margin-bottom:12px;
+    font-size:12px;
+    line-height:1.65;
+}
+
+.usb-box span{
+    color:var(--muted);
+}
+
+.usb-box b{
+    color:white;
+}
+
+.progress-box{
+    margin-top:14px;
+}
+
+.progress-track{
+    width:100%;
+    background:#080a0c;
+    border:1px solid var(--line);
+    height:11px;
+    border-radius:100px;
+    overflow:hidden;
+}
+
+.progress-bar{
+    width:0%;
+    height:100%;
+    background:linear-gradient(90deg,var(--orange),#ffc14d);
+    transition:.25s;
+}
+
+.progress-text{
+    display:flex;
+    justify-content:space-between;
+    margin-top:6px;
+    color:var(--muted);
+    font-size:11px;
+}
+
+.stats{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:9px;
+    margin-top:12px;
+}
+
+.stat{
+    padding:11px;
+    border-radius:10px;
+    background:#090c0f;
+    border:1px solid var(--line);
+}
+
+.stat strong{
+    display:block;
+    font-size:15px;
+}
+
+.stat span{
+    display:block;
+    font-size:10px;
+    color:var(--muted);
+    margin-top:2px;
+}
+
+.log-panel{
+    margin-top:16px;
+}
+
+#log{
+    height:190px;
+    overflow:auto;
+    background:#06080a;
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:12px;
+    color:#9fb1be;
+    font-family:Menlo,Monaco,monospace;
+    font-size:11px;
+    line-height:1.65;
+    white-space:pre-wrap;
+}
+
+.warning{
+    padding:10px 12px;
+    background:rgba(255,122,0,.08);
+    border:1px solid rgba(255,122,0,.28);
+    border-radius:10px;
+    color:#f9b56c;
+    font-size:11px;
+    line-height:1.5;
+    margin-top:12px;
+}
+
+.native-indicator{
+    padding:8px;
+    border-radius:8px;
+    text-align:center;
+    font-size:11px;
+    margin-bottom:12px;
+    background:#401d1d;
+    color:#ff9d9d;
+}
+
+.native-indicator.ok{
+    background:#113323;
+    color:#62e9a4;
+}
+
+footer{
+    text-align:center;
+    padding:20px;
+    font-size:11px;
+    color:#66717b;
+}
+
+@media(max-width:1050px){
+    .grid{
+        grid-template-columns:1fr;
+    }
+
+    .viewer{
+        min-height:480px;
+    }
+
+    #canvas{
+        height:480px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+    <div class="header">
+        <div class="brand">
+            <h1>MEYDEN DREMEL 3D20</h1>
+            <small>LOCAL PRINT CONTROL • macOS</small>
+        </div>
+
+        <div class="status" id="printerStatus">
+            <div class="status-dot"></div>
+            <span id="statusText">DREMEL NON CONNECTÉE</span>
+        </div>
+    </div>
+
+
+    <div class="grid">
+
+        <!-- =========================
+             COLONNE GAUCHE
+        ========================== -->
+
+        <div>
+
+            <div class="panel">
+
+                <div class="panel-title">
+                    Fichier
+                </div>
+
+                <div class="panel-content">
+
+                    <div class="drop" id="dropZone">
+                        <div class="drop-icon">⬡</div>
+
+                        <strong>Importer une pièce</strong>
+
+                        <span>
+                            STL • GCODE • G3DREM
+                        </span>
+                    </div>
+
+                    <input
+                        id="fileInput"
+                        type="file"
+                        accept=".stl,.gcode,.g3drem"
+                    >
+
+                    <div class="file-info" id="fileInfo">
+                        Aucun fichier chargé.
+                    </div>
+
+                </div>
+            </div>
+
+
+            <div class="panel" style="margin-top:16px;">
+
+                <div class="panel-title">
+                    Paramètres Dremel
+                </div>
+
+                <div class="panel-content">
+
+                    <div class="field">
+
+                        <label>QUALITÉ</label>
+
+                        <select id="quality">
+
+                            <option value="0.32">
+                                Rapide — 0,32 mm
+                            </option>
+
+                            <option value="0.20" selected>
+                                Standard — 0,20 mm
+                            </option>
+
+                            <option value="0.10">
+                                Haute qualité — 0,10 mm
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="field">
+
+                        <label>REMPLISSAGE %</label>
+
+                        <input
+                            id="infill"
+                            type="number"
+                            min="0"
+                            max="100"
+                            value="18"
+                        >
+
+                    </div>
+
+
+                    <div class="field">
+
+                        <label>TEMPÉRATURE PLA °C</label>
+
+                        <input
+                            id="temperature"
+                            type="number"
+                            min="180"
+                            max="240"
+                            value="220"
+                        >
+
+                    </div>
+
+
+                    <div class="field">
+
+                        <label>VITESSE mm/s</label>
+
+                        <input
+                            id="speed"
+                            type="number"
+                            min="10"
+                            max="100"
+                            value="60"
+                        >
+
+                    </div>
+
+
+                    <div class="switch-row">
+
+                        <span>Supports</span>
+
+                        <label class="switch">
+                            <input id="supports" type="checkbox">
+                            <span class="slider"></span>
+                        </label>
+
+                    </div>
+
+
+                    <div class="switch-row">
+
+                        <span>Ventilation PLA</span>
+
+                        <label class="switch">
+                            <input id="fan" type="checkbox" checked>
+                            <span class="slider"></span>
+                        </label>
+
+                    </div>
+
+
+                    <button
+                        class="btn orange"
+                        id="prepareBtn"
+                        disabled
+                    >
+                        PRÉPARER LA PIÈCE
+                    </button>
+
+
+                    <button
+                        class="btn"
+                        id="exportProjectBtn"
+                        disabled
+                    >
+                        EXPORTER LE PROJET
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =========================
+             CENTRE / APERÇU
+        ========================== -->
+
+        <div class="panel">
+
+            <div class="panel-title">
+                Aperçu de la pièce
+            </div>
+
+            <div class="viewer">
+
+                <canvas id="canvas"></canvas>
+
+                <div class="viewer-overlay">
+
+                    <div class="badge">
+                        DREMEL 3D20
+                    </div>
+
+                    <div class="badge" id="triangleBadge">
+                        0 triangles
+                    </div>
+
+                </div>
+
+                <div class="build-volume">
+                    Volume : 230 × 150 × 140 mm
+                </div>
+
+            </div>
+
+
+            <div class="panel-content">
+
+                <div class="stats">
+
+                    <div class="stat">
+                        <strong id="sizeX">—</strong>
+                        <span>LARGEUR X</span>
+                    </div>
+
+                    <div class="stat">
+                        <strong id="sizeY">—</strong>
+                        <span>PROFONDEUR Y</span>
+                    </div>
+
+                    <div class="stat">
+                        <strong id="sizeZ">—</strong>
+                        <span>HAUTEUR Z</span>
+                    </div>
+
+                    <div class="stat">
+                        <strong id="estimatedTime">—</strong>
+                        <span>TEMPS ESTIMÉ</span>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =========================
+             COLONNE DROITE
+        ========================== -->
+
+        <div>
+
+            <div class="panel">
+
+                <div class="panel-title">
+                    Connexion Dremel 3D20
+                </div>
+
+                <div class="panel-content">
+
+                    <div
+                        class="native-indicator"
+                        id="nativeIndicator"
+                    >
+                        MODE HTML LOCAL
+                    </div>
+
+
+                    <div class="usb-box">
+
+                        <span>Fabricant USB</span><br>
+                        <b>Dremel</b>
+
+                        <br><br>
+
+                        <span>VID attendu</span><br>
+                        <b>0x2A89</b>
+
+                        <br><br>
+
+                        <span>PID attendu</span><br>
+                        <b>0x8889</b>
+
+                        <br><br>
+
+                        <span>État</span><br>
+                        <b id="usbState">Non détectée</b>
+
+                    </div>
+
+
+                    <button
+                        class="btn blue"
+                        id="detectBtn"
+                    >
+                        DÉTECTER LA DREMEL
+                    </button>
+
+
+                    <button
+                        class="btn"
+                        id="connectBtn"
+                    >
+                        CONNECTER
+                    </button>
+
+
+                    <button
+                        class="btn green"
+                        id="transferBtn"
+                        disabled
+                    >
+                        TRANSFÉRER
+                    </button>
+
+
+                    <button
+                        class="btn orange"
+                        id="printBtn"
+                        disabled
+                    >
+                        TRANSFÉRER + IMPRIMER
+                    </button>
+
+
+                    <div class="progress-box">
+
+                        <div class="progress-track">
+                            <div
+                                class="progress-bar"
+                                id="progressBar"
+                            ></div>
+                        </div>
+
+                        <div class="progress-text">
+
+                            <span id="progressStatus">
+                                En attente
+                            </span>
+
+                            <span id="progressValue">
+                                0 %
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="warning">
+
+                        La connexion USB directe nécessite
+                        la coque native macOS.
+
+                        Le même HTML peut être intégré
+                        directement dans notre application
+                        Mac avec WKWebView.
+
+                    </div>
+
+                </div>
+            </div>
+
+
+            <div class="panel log-panel">
+
+                <div class="panel-title">
+                    Journal
+                </div>
+
+                <div class="panel-content">
+
+                    <div id="log"></div>
+
+                    <button
+                        class="btn"
+                        onclick="clearLog()"
+                    >
+                        EFFACER JOURNAL
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <footer>
+        MEYDEN • Dremel 3D20 Local Control
+    </footer>
+
+</div>
+
+
+
+<script>
+
+/* ==========================================================
+   MEYDEN DREMEL 3D20
+   Interface HTML locale
+   ========================================================== */
+
+
+const MACHINE = {
+
+    name: "Dremel 3D20",
+
+    width: 230,
+
+    depth: 150,
+
+    height: 140,
+
+    nozzle: 0.4,
+
+    filament: 1.75,
+
+    usbVID: "2A89",
+
+    usbPID: "8889"
+
+};
+
+
+let currentFile = null;
+
+let currentFileBuffer = null;
+
+let triangles = [];
+
+let bounds = null;
+
+let prepared = false;
+
+let rotationX = -0.55;
+
+let rotationY = 0.70;
+
+let zoom = 1;
+
+let dragging = false;
+
+let lastMouseX = 0;
+
+let lastMouseY = 0;
+
+
+
+/* ==========================================================
+   ÉLÉMENTS
+   ========================================================== */
+
+const canvas =
+    document.getElementById("canvas");
+
+const ctx =
+    canvas.getContext("2d");
+
+const dropZone =
+    document.getElementById("dropZone");
+
+const fileInput =
+    document.getElementById("fileInput");
+
+const fileInfo =
+    document.getElementById("fileInfo");
+
+const logBox =
+    document.getElementById("log");
+
+
+
+/* ==========================================================
+   LOG
+   ========================================================== */
+
+function log(message){
+
+    const time =
+        new Date().toLocaleTimeString();
+
+    logBox.textContent +=
+        "[" + time + "] " + message + "\n";
+
+    logBox.scrollTop =
+        logBox.scrollHeight;
+}
+
+
+function clearLog(){
+
+    logBox.textContent = "";
+
+    log("Journal effacé.");
+}
+
+
+
+/* ==========================================================
+   DÉTECTION MODE NATIF
+   ========================================================== */
+
+function nativeAvailable(){
+
+    return !!(
+        window.webkit &&
+        window.webkit.messageHandlers
+    );
+}
+
+
+function updateNativeIndicator(){
+
+    const indicator =
+        document.getElementById(
+            "nativeIndicator"
+        );
+
+    if(nativeAvailable()){
+
+        indicator.textContent =
+            "COQUE MACOS DÉTECTÉE";
+
+        indicator.classList.add("ok");
+
+        log(
+            "Pont macOS WKWebView disponible."
+        );
+
+    }else{
+
+        indicator.textContent =
+            "MODE HTML LOCAL";
+
+        indicator.classList.remove("ok");
+
+        log(
+            "HTML lancé sans coque native macOS."
+        );
+    }
+}
+
+
+
+/* ==========================================================
+   PONT NATIF
+   ========================================================== */
+
+function sendNative(command,data={}){
+
+    if(
+        window.webkit &&
+        window.webkit.messageHandlers &&
+        window.webkit.messageHandlers[
+            command
+        ]
+    ){
+
+        window.webkit
+            .messageHandlers[command]
+            .postMessage(data);
+
+        return true;
+    }
+
+    log(
+        "Commande native indisponible : "
+        + command
+    );
+
+    return false;
+}
+
+
+
+/* ==========================================================
+   IMPORT FICHIER
+   ========================================================== */
+
+dropZone.onclick = () => {
+
+    fileInput.click();
+};
+
+
+dropZone.ondragover = e => {
+
+    e.preventDefault();
+
+    dropZone.classList.add("drag");
+};
+
+
+dropZone.ondragleave = () => {
+
+    dropZone.classList.remove("drag");
+};
+
+
+dropZone.ondrop = e => {
+
+    e.preventDefault();
+
+    dropZone.classList.remove("drag");
+
+    if(e.dataTransfer.files.length){
+
+        loadFile(
+            e.dataTransfer.files[0]
+        );
+    }
+};
+
+
+fileInput.onchange = e => {
+
+    if(e.target.files.length){
+
+        loadFile(
+            e.target.files[0]
+        );
+    }
+};
+
+
+
+async function loadFile(file){
+
+    currentFile = file;
+
+    currentFileBuffer =
+        await file.arrayBuffer();
+
+    const extension =
+        file.name
+            .split(".")
+            .pop()
+            .toLowerCase();
+
+    fileInfo.innerHTML =
+
+        "<b>" +
+        escapeHTML(file.name) +
+        "</b><br>" +
+
+        formatBytes(file.size) +
+        "<br>" +
+
+        extension.toUpperCase();
+
+
+    document
+        .getElementById(
+            "prepareBtn"
+        )
+        .disabled = false;
+
+
+    document
+        .getElementById(
+            "exportProjectBtn"
+        )
+        .disabled = false;
+
+
+    log(
+        "Fichier chargé : "
+        + file.name
+    );
+
+
+    if(extension === "stl"){
+
+        try{
+
+            parseSTL(
+                currentFileBuffer
+            );
+
+        }catch(err){
+
+            log(
+                "Erreur STL : "
+                + err.message
+            );
+        }
+
+    }else{
+
+        triangles = [];
+
+        bounds = null;
+
+        updateModelInfo();
+
+        drawPlaceholder(
+            extension.toUpperCase()
+        );
+    }
+
+
+    prepared = false;
+
+    updateButtons();
+}
+
+
+
+/* ==========================================================
+   PARSE STL
+   ========================================================== */
+
+function parseSTL(buffer){
+
+    triangles = [];
+
+    const bytes =
+        new Uint8Array(buffer);
+
+    const headerText =
+        new TextDecoder()
+        .decode(
+            bytes.slice(
+                0,
+                Math.min(
+                    bytes.length,
+                    100
+                )
+            )
+        )
+        .trim();
+
+
+    let ascii =
+        headerText
+        .toLowerCase()
+        .startsWith("solid");
+
+
+    if(ascii){
+
+        try{
+
+            const text =
+                new TextDecoder()
+                .decode(buffer);
+
+            parseASCIISTL(text);
+
+            if(triangles.length === 0){
+
+                parseBinarySTL(buffer);
+            }
+
+        }catch{
+
+            parseBinarySTL(buffer);
+        }
+
+    }else{
+
+        parseBinarySTL(buffer);
+    }
+
+
+    calculateBounds();
+
+    updateModelInfo();
+
+    fitModel();
+
+    drawScene();
+
+    log(
+        "STL analysé : "
+        + triangles.length
+        + " triangles."
+    );
+}
+
+
+
+function parseBinarySTL(buffer){
+
+    const view =
+        new DataView(buffer);
+
+    if(buffer.byteLength < 84){
+
+        throw new Error(
+            "STL binaire invalide."
+        );
+    }
+
+
+    const count =
+        view.getUint32(
+            80,
+            true
+        );
+
+
+    let offset = 84;
+
+
+    for(
+        let i=0;
+        i<count &&
+        offset+50<=buffer.byteLength;
+        i++
+    ){
+
+        offset += 12;
+
+        const triangle = [];
+
+
+        for(let v=0;v<3;v++){
+
+            triangle.push({
+
+                x:
+                view.getFloat32(
+                    offset,
+                    true
+                ),
+
+                y:
+                view.getFloat32(
+                    offset+4,
+                    true
+                ),
+
+                z:
+                view.getFloat32(
+                    offset+8,
+                    true
+                )
+
+            });
+
+            offset += 12;
+        }
+
+
+        triangles.push(
+            triangle
+        );
+
+        offset += 2;
+    }
+}
+
+
+
+function parseASCIISTL(text){
+
+    const vertexRegex =
+        /vertex\s+([-\d.eE+]+)\s+([-\d.eE+]+)\s+([-\d.eE+]+)/g;
+
+
+    let match;
+
+    let vertices = [];
+
+
+    while(
+        (
+            match =
+            vertexRegex.exec(text)
+        ) !== null
+    ){
+
+        vertices.push({
+
+            x:parseFloat(match[1]),
+
+            y:parseFloat(match[2]),
+
+            z:parseFloat(match[3])
+
+        });
+
+
+        if(vertices.length === 3){
+
+            triangles.push(
+                vertices
+            );
+
+            vertices = [];
+        }
+    }
+}
+
+
+
+/* ==========================================================
+   BOUNDS
+   ========================================================== */
+
+function calculateBounds(){
+
+    if(!triangles.length){
+
+        bounds = null;
+
+        return;
+    }
+
+
+    let minX=Infinity;
+    let minY=Infinity;
+    let minZ=Infinity;
+
+    let maxX=-Infinity;
+    let maxY=-Infinity;
+    let maxZ=-Infinity;
+
+
+    triangles.forEach(
+        triangle => {
+
+            triangle.forEach(
+                v => {
+
+                    minX =
+                        Math.min(
+                            minX,
+                            v.x
+                        );
+
+                    minY =
+                        Math.min(
+                            minY,
+                            v.y
+                        );
+
+                    minZ =
+                        Math.min(
+                            minZ,
+                            v.z
+                        );
+
+                    maxX =
+                        Math.max(
+                            maxX,
+                            v.x
+                        );
+
+                    maxY =
+                        Math.max(
+                            maxY,
+                            v.y
+                        );
+
+                    maxZ =
+                        Math.max(
+                            maxZ,
+                            v.z
+                        );
+                }
+            );
+        }
+    );
+
+
+    bounds = {
+
+        minX,
+        minY,
+        minZ,
+
+        maxX,
+        maxY,
+        maxZ,
+
+        width:
+        maxX-minX,
+
+        depth:
+        maxY-minY,
+
+        height:
+        maxZ-minZ
+    };
+}
+
+
+
+/* ==========================================================
+   INFO MODÈLE
+   ========================================================== */
+
+function updateModelInfo(){
+
+    document
+        .getElementById(
+            "triangleBadge"
+        )
+        .textContent =
+        triangles.length
+        + " triangles";
+
+
+    if(!bounds){
+
+        sizeX.textContent = "—";
+
+        sizeY.textContent = "—";
+
+        sizeZ.textContent = "—";
+
+        return;
+    }
+
+
+    sizeX.textContent =
+        bounds.width
+        .toFixed(1)
+        + " mm";
+
+
+    sizeY.textContent =
+        bounds.depth
+        .toFixed(1)
+        + " mm";
+
+
+    sizeZ.textContent =
+        bounds.height
+        .toFixed(1)
+        + " mm";
+
+
+    estimatePrintTime();
+}
+
+
+
+/* ==========================================================
+   ESTIMATION
+   ========================================================== */
+
+function estimatePrintTime(){
+
+    if(!bounds){
+
+        estimatedTime.textContent =
+            "—";
+
+        return;
+    }
+
+
+    const layer =
+        parseFloat(
+            quality.value
+        );
+
+
+    const infill =
+        parseFloat(
+            document
+            .getElementById(
+                "infill"
+            )
+            .value
+        );
+
+
+    const speed =
+        parseFloat(
+            document
+            .getElementById(
+                "speed"
+            )
+            .value
+        );
+
+
+    const layers =
+        Math.max(
+            1,
+            bounds.height/layer
+        );
+
+
+    const volumeFactor =
+        bounds.width *
+        bounds.depth *
+        bounds.height;
+
+
+    let minutes =
+
+        (
+            volumeFactor /
+            4000
+        )
+
+        *
+
+        (
+            0.4 +
+            infill/100
+        )
+
+        *
+
+        (
+            layers/300
+        )
+
+        *
+
+        (
+            60/
+            Math.max(
+                speed,
+                1
+            )
+        )
+
+        *
+
+        60;
+
+
+    minutes =
+        Math.max(
+            2,
+            Math.round(minutes)
+        );
+
+
+    if(minutes >= 60){
+
+        const h =
+            Math.floor(
+                minutes/60
+            );
+
+        const m =
+            minutes%60;
+
+        estimatedTime.textContent =
+            h+" h "+m+" min";
+
+    }else{
+
+        estimatedTime.textContent =
+            minutes+" min";
+    }
+}
+
+
+
+/* ==========================================================
+   APERÇU 3D SIMPLE
+   ========================================================== */
+
+function resizeCanvas(){
+
+    const rect =
+        canvas.getBoundingClientRect();
+
+    canvas.width =
+        rect.width *
+        devicePixelRatio;
+
+    canvas.height =
+        rect.height *
+        devicePixelRatio;
+
+    ctx.setTransform(
+        devicePixelRatio,
+        0,
+        0,
+        devicePixelRatio,
+        0,
+        0
+    );
+
+    drawScene();
+}
+
+
+
+function fitModel(){
+
+    zoom = 1;
+}
+
+
+
+function project(v){
+
+    if(!bounds){
+
+        return {
+            x:0,
+            y:0
+        };
+    }
+
+
+    const cx =
+        (
+            bounds.minX+
+            bounds.maxX
+        )/2;
+
+
+    const cy =
+        (
+            bounds.minY+
+            bounds.maxY
+        )/2;
+
+
+    const cz =
+        (
+            bounds.minZ+
+            bounds.maxZ
+        )/2;
+
+
+    let x =
+        v.x-cx;
+
+    let y =
+        v.y-cy;
+
+    let z =
+        v.z-cz;
+
+
+    const cosY =
+        Math.cos(rotationY);
+
+    const sinY =
+        Math.sin(rotationY);
+
+
+    let x1 =
+        x*cosY -
+        z*sinY;
+
+    let z1 =
+        x*sinY +
+        z*cosY;
+
+
+    const cosX =
+        Math.cos(rotationX);
+
+    const sinX =
+        Math.sin(rotationX);
+
+
+    let y1 =
+        y*cosX -
+        z1*sinX;
+
+
+    const w =
+        canvas.clientWidth;
+
+    const h =
+        canvas.clientHeight;
+
+
+    const maxSize =
+        Math.max(
+            bounds.width,
+            bounds.depth,
+            bounds.height,
+            1
+        );
+
+
+    const scale =
+        (
+            Math.min(
+                w,
+                h
+            )
+            /
+            maxSize
+        )
+        *
+        .68
+        *
+        zoom;
+
+
+    return {
+
+        x:
+        w/2 +
+        x1*scale,
+
+        y:
+        h/2 -
+        y1*scale
+    };
+}
+
+
+
+function drawScene(){
+
+    const w =
+        canvas.clientWidth;
+
+    const h =
+        canvas.clientHeight;
+
+
+    ctx.clearRect(
+        0,
+        0,
+        w,
+        h
+    );
+
+
+    drawGrid();
+
+
+    if(!triangles.length){
+
+        drawPlaceholder(
+            "IMPORTER STL"
+        );
+
+        return;
+    }
+
+
+    ctx.lineWidth = .7;
+
+    ctx.strokeStyle =
+        "rgba(255,122,0,.58)";
+
+
+    const maxTriangles =
+        25000;
+
+
+    const step =
+        Math.max(
+            1,
+            Math.ceil(
+                triangles.length/
+                maxTriangles
+            )
+        );
+
+
+    for(
+        let i=0;
+        i<triangles.length;
+        i+=step
+    ){
+
+        const t =
+            triangles[i];
+
+
+        const p1 =
+            project(t[0]);
+
+        const p2 =
+            project(t[1]);
+
+        const p3 =
+            project(t[2]);
+
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            p1.x,
+            p1.y
+        );
+
+        ctx.lineTo(
+            p2.x,
+            p2.y
+        );
+
+        ctx.lineTo(
+            p3.x,
+            p3.y
+        );
+
+        ctx.closePath();
+
+        ctx.stroke();
+    }
+}
+
+
+
+function drawGrid(){
+
+    const w =
+        canvas.clientWidth;
+
+    const h =
+        canvas.clientHeight;
+
+
+    ctx.strokeStyle =
+        "rgba(255,255,255,.035)";
+
+    ctx.lineWidth = 1;
+
+
+    for(
+        let x=0;
+        x<w;
+        x+=30
+    ){
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            x,
+            0
+        );
+
+        ctx.lineTo(
+            x,
+            h
+        );
+
+        ctx.stroke();
+    }
+
+
+    for(
+        let y=0;
+        y<h;
+        y+=30
+    ){
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            0,
+            y
+        );
+
+        ctx.lineTo(
+            w,
+            y
+        );
+
+        ctx.stroke();
+    }
+}
+
+
+
+function drawPlaceholder(text){
+
+    const w =
+        canvas.clientWidth;
+
+    const h =
+        canvas.clientHeight;
+
+
+    ctx.fillStyle =
+        "#56616a";
+
+    ctx.textAlign =
+        "center";
+
+    ctx.font =
+        "700 18px -apple-system";
+
+    ctx.fillText(
+        text,
+        w/2,
+        h/2
+    );
+
+
+    ctx.font =
+        "12px -apple-system";
+
+    ctx.fillStyle =
+        "#333d46";
+
+    ctx.fillText(
+        "MEYDEN • DREMEL 3D20",
+        w/2,
+        h/2+26
+    );
+}
+
+
+
+/* ==========================================================
+   CONTRÔLE SOURIS
+   ========================================================== */
+
+canvas.addEventListener(
+    "mousedown",
+    e => {
+
+        dragging = true;
+
+        lastMouseX =
+            e.clientX;
+
+        lastMouseY =
+            e.clientY;
+    }
+);
+
+
+window.addEventListener(
+    "mouseup",
+    () => {
+
+        dragging = false;
+    }
+);
+
+
+window.addEventListener(
+    "mousemove",
+    e => {
+
+        if(!dragging){
+
+            return;
+        }
+
+
+        rotationY +=
+            (
+                e.clientX -
+                lastMouseX
+            )
+            *
+            .01;
+
+
+        rotationX +=
+            (
+                e.clientY -
+                lastMouseY
+            )
+            *
+            .01;
+
+
+        lastMouseX =
+            e.clientX;
+
+        lastMouseY =
+            e.clientY;
+
+
+        drawScene();
+    }
+);
+
+
+canvas.addEventListener(
+    "wheel",
+    e => {
+
+        e.preventDefault();
+
+
+        zoom *=
+            e.deltaY > 0
+            ? .90
+            : 1.10;
+
+
+        zoom =
+            Math.min(
+                6,
+                Math.max(
+                    .2,
+                    zoom
+                )
+            );
+
+
+        drawScene();
+    },
+    {
+        passive:false
+    }
+);
+
+
+
+/* ==========================================================
+   PRÉPARATION
+   ========================================================== */
+
+document
+.getElementById(
+    "prepareBtn"
+)
+.onclick = async () => {
+
+    if(!currentFile){
+
+        return;
+    }
+
+
+    const settings =
+        getSettings();
+
+
+    log(
+        "Préparation du projet..."
+    );
+
+
+    if(bounds){
+
+        if(
+            bounds.width >
+            MACHINE.width ||
+
+            bounds.depth >
+            MACHINE.depth ||
+
+            bounds.height >
+            MACHINE.height
+        ){
+
+            log(
+                "ATTENTION : pièce hors volume Dremel 3D20."
+            );
+
+            alert(
+                "La pièce dépasse le volume d'impression de la Dremel 3D20."
+            );
+
+            return;
+        }
+    }
+
+
+    setProgress(
+        15,
+        "Analyse"
+    );
+
+
+    await sleep(250);
+
+
+    setProgress(
+        45,
+        "Paramètres"
+    );
+
+
+    await sleep(250);
+
+
+    setProgress(
+        75,
+        "Préparation"
+    );
+
+
+    /*
+       Si le HTML est intégré dans
+       notre application macOS,
+       on transmet le fichier
+       et les paramètres au moteur natif.
+    */
+
+    if(nativeAvailable()){
+
+        sendNative(
+            "prepareSTL",
+            {
+
+                fileName:
+                currentFile.name,
+
+                settings:
+                settings
+
+            }
+        );
+
+    }else{
+
+        log(
+            "Moteur natif absent : projet préparé côté interface uniquement."
+        );
+    }
+
+
+    prepared = true;
+
+
+    setProgress(
+        100,
+        "Prêt"
+    );
+
+
+    updateButtons();
+
+
+    log(
+        "Projet prêt."
+    );
+};
+
+
+
+/* ==========================================================
+   EXPORT PROJET
+   ========================================================== */
+
+document
+.getElementById(
+    "exportProjectBtn"
+)
+.onclick = () => {
+
+    if(!currentFile){
+
+        return;
+    }
+
+
+    const project = {
+
+        application:
+        "MEYDEN Dremel 3D20",
+
+        version:
+        "1.0",
+
+        created:
+        new Date()
+        .toISOString(),
+
+        machine:
+        MACHINE,
+
+        sourceFile:{
+
+            name:
+            currentFile.name,
+
+            size:
+            currentFile.size
+
+        },
+
+        bounds:
+        bounds,
+
+        settings:
+        getSettings()
+
+    };
+
+
+    const blob =
+        new Blob(
+
+            [
+                JSON.stringify(
+                    project,
+                    null,
+                    2
+                )
+            ],
+
+            {
+                type:
+                "application/json"
+            }
+        );
+
+
+    downloadBlob(
+        blob,
+        "MEYDEN_Dremel_Project.json"
+    );
+
+
+    log(
+        "Projet MEYDEN exporté."
+    );
+};
+
+
+
+/* ==========================================================
+   USB
+   ========================================================== */
+
+document
+.getElementById(
+    "detectBtn"
+)
+.onclick = () => {
+
+    log(
+        "Recherche Dremel 3D20 USB..."
+    );
+
+
+    if(
+        sendNative(
+            "detectUSB",
+            {
+                vid:
+                MACHINE.usbVID,
+
+                pid:
+                MACHINE.usbPID
+            }
+        )
+    ){
+
+        document
+            .getElementById(
+                "usbState"
+            )
+            .textContent =
+            "Recherche...";
+
+    }else{
+
+        alert(
+            "La détection USB directe nécessite l'application macOS native.\n\nL'interface HTML fonctionne, mais Safari ne peut pas communiquer directement avec la Dremel 3D20."
+        );
+    }
+};
+
+
+
+document
+.getElementById(
+    "connectBtn"
+)
+.onclick = () => {
+
+    log(
+        "Demande de connexion USB."
+    );
+
+
+    sendNative(
+        "connectUSB",
+        {
+            handshake:
+            "M601 S0"
+        }
+    );
+};
+
+
+
+document
+.getElementById(
+    "transferBtn"
+)
+.onclick = () => {
+
+    if(!prepared){
+
+        alert(
+            "Prépare d'abord la pièce."
+        );
+
+        return;
+    }
+
+
+    log(
+        "Début transfert Dremel."
+    );
+
+
+    sendNative(
+        "transferFile",
+        {
+            fileName:
+            currentFile.name,
+
+            autoPrint:
+            false
+        }
+    );
+};
+
+
+
+document
+.getElementById(
+    "printBtn"
+)
+.onclick = () => {
+
+    if(!prepared){
+
+        return;
+    }
+
+
+    if(
+        !confirm(
+            "Transférer le fichier et démarrer l'impression ?"
+        )
+    ){
+
+        return;
+    }
+
+
+    log(
+        "Transfert + impression demandé."
+    );
+
+
+    sendNative(
+        "transferFile",
+        {
+            fileName:
+            currentFile.name,
+
+            autoPrint:
+            true
+        }
+    );
+};
+
+
+
+/* ==========================================================
+   CALLBACKS UTILISÉS PAR LA COQUE MACOS
+   ========================================================== */
+
+window.MEYDEN = {
+
+
+    printerFound(info={}){
+
+        document
+            .getElementById(
+                "usbState"
+            )
+            .textContent =
+            "Dremel détectée";
+
+
+        log(
+            "Dremel 3D20 détectée."
+        );
+    },
+
+
+    printerConnected(){
+
+        const status =
+            document
+            .getElementById(
+                "printerStatus"
+            );
+
+
+        status.classList.add(
+            "connected"
+        );
+
+
+        document
+            .getElementById(
+                "statusText"
+            )
+            .textContent =
+            "DREMEL CONNECTÉE";
+
+
+        document
+            .getElementById(
+                "usbState"
+            )
+            .textContent =
+            "Connectée";
+
+
+        log(
+            "Connexion Dremel établie."
+        );
+
+
+        updateButtons();
+    },
+
+
+    printerDisconnected(){
+
+        const status =
+            document
+            .getElementById(
+                "printerStatus"
+            );
+
+
+        status.classList.remove(
+            "connected"
+        );
+
+
+        document
+            .getElementById(
+                "statusText"
+            )
+            .textContent =
+            "DREMEL NON CONNECTÉE";
+
+
+        document
+            .getElementById(
+                "usbState"
+            )
+            .textContent =
+            "Déconnectée";
+
+
+        log(
+            "Dremel déconnectée."
+        );
+
+
+        updateButtons();
+    },
+
+
+    progress(value,message){
+
+        setProgress(
+            value,
+            message ||
+            "Transfert"
+        );
+    },
+
+
+    log(message){
+
+        log(
+            "MAC : "
+            + message
+        );
+    },
+
+
+    error(message){
+
+        log(
+            "ERREUR : "
+            + message
+        );
+
+
+        alert(message);
+    },
+
+
+    transferComplete(){
+
+        setProgress(
+            100,
+            "Transfert terminé"
+        );
+
+
+        log(
+            "Transfert terminé."
+        );
+    }
+
+};
+
+
+
+/* ==========================================================
+   SETTINGS
+   ========================================================== */
+
+function getSettings(){
+
+    return {
+
+        layerHeight:
+        parseFloat(
+            quality.value
+        ),
+
+        infill:
+        parseFloat(
+            document
+            .getElementById(
+                "infill"
+            )
+            .value
+        ),
+
+        temperature:
+        parseFloat(
+            document
+            .getElementById(
+                "temperature"
+            )
+            .value
+        ),
+
+        speed:
+        parseFloat(
+            document
+            .getElementById(
+                "speed"
+            )
+            .value
+        ),
+
+        supports:
+        document
+        .getElementById(
+            "supports"
+        )
+        .checked,
+
+        fan:
+        document
+        .getElementById(
+            "fan"
+        )
+        .checked,
+
+        nozzle:
+        MACHINE.nozzle,
+
+        filament:
+        MACHINE.filament
+    };
+}
+
+
+
+/* ==========================================================
+   PROGRESSION
+   ========================================================== */
+
+function setProgress(
+    value,
+    text
+){
+
+    value =
+        Math.max(
+            0,
+            Math.min(
+                100,
+                value
+            )
+        );
+
+
+    document
+        .getElementById(
+            "progressBar"
+        )
+        .style.width =
+        value+"%";
+
+
+    document
+        .getElementById(
+            "progressValue"
+        )
+        .textContent =
+        Math.round(value)
+        +" %";
+
+
+    document
+        .getElementById(
+            "progressStatus"
+        )
+        .textContent =
+        text;
+}
+
+
+
+/* ==========================================================
+   BOUTONS
+   ========================================================== */
+
+function updateButtons(){
+
+    document
+        .getElementById(
+            "transferBtn"
+        )
+        .disabled =
+        !prepared;
+
+
+    document
+        .getElementById(
+            "printBtn"
+        )
+        .disabled =
+        !prepared;
+}
+
+
+
+/* ==========================================================
+   UTILITAIRES
+   ========================================================== */
+
+function formatBytes(bytes){
+
+    if(bytes < 1024){
+
+        return bytes+" octets";
+    }
+
+
+    if(bytes < 1048576){
+
+        return(
+            bytes/1024
+        ).toFixed(1)
+        +" Ko";
+    }
+
+
+    return(
+        bytes/1048576
+    ).toFixed(2)
+    +" Mo";
+}
+
+
+
+function escapeHTML(str){
+
+    return str.replace(
+        /[&<>"']/g,
+        char => ({
+
+            "&":"&amp;",
+
+            "<":"&lt;",
+
+            ">":"&gt;",
+
+            '"':"&quot;",
+
+            "'":"&#039;"
+
+        })[char]
+    );
+}
+
+
+
+function sleep(ms){
+
+    return new Promise(
+        resolve =>
+        setTimeout(
+            resolve,
+            ms
+        )
+    );
+}
+
+
+
+function downloadBlob(
+    blob,
+    filename
+){
+
+    const url =
+        URL.createObjectURL(blob);
+
+
+    const a =
+        document.createElement("a");
+
+
+    a.href =
+        url;
+
+    a.download =
+        filename;
+
+
+    document
+        .body
+        .appendChild(a);
+
+
+    a.click();
+
+
+    a.remove();
+
+
+    setTimeout(
+        () =>
+        URL.revokeObjectURL(url),
+        1000
+    );
+}
+
+
+
+/* ==========================================================
+   ÉCOUTE PARAMÈTRES
+   ========================================================== */
+
+[
+    "quality",
+    "infill",
+    "temperature",
+    "speed",
+    "supports",
+    "fan"
+]
+.forEach(
+    id => {
+
+        document
+        .getElementById(id)
+        .addEventListener(
+            "change",
+            () => {
+
+                estimatePrintTime();
+
+                prepared = false;
+
+                updateButtons();
+            }
+        );
+    }
+);
+
+
+
+/* ==========================================================
+   DÉMARRAGE
+   ========================================================== */
+
+window.addEventListener(
+    "resize",
+    resizeCanvas
+);
+
+
+window.addEventListener(
+    "load",
+    () => {
+
+        resizeCanvas();
+
+        updateNativeIndicator();
+
+        log(
+            "MEYDEN Dremel 3D20 initialisé."
+        );
+
+        log(
+            "Machine : 230 × 150 × 140 mm."
+        );
+
+        log(
+            "Buse : 0,4 mm • PLA : 1,75 mm."
+        );
+    }
+);
+
+</script>
+
+</body>
+</html>
